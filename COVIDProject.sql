@@ -269,7 +269,7 @@ SELECT *, CAST(ROUND((rolling_vaccinated/population)*100, 2) as float) as popula
 FROM PercentPoulationVaccinated;
 
 
--- Cretae view for visualization
+-- Create a view for visualization
 
 DROP VIEW IF exists PercentPoulationVaccinate;
 CREATE VIEW PercentPoulationVaccinate as
@@ -282,5 +282,45 @@ CREATE VIEW PercentPoulationVaccinate as
 Select TOP 100 *
 FROM PercentPoulationVaccinate
 where location = 'Canada' and new_vaccination IS NOT NULL;
+
+-- TABLEAU PROJECT
+
+-- Total number of cases vs total deaths vs Deathpecantage worldwide
+Select SUM(new_cases) as total_cases, SUM(cast(new_deaths as int)) as total_deaths, SUM(cast(new_deaths as int))/SUM(New_Cases)*100 as DeathPercentage
+From CovidDeaths
+where continent is not null 
+order by 1,2;
+
+
+-- Total Deaths by Continent
+Select location, SUM(cast(new_deaths as int)) as TotalDeathCount
+From CovidDeaths
+Where continent is null 
+and location not in ('World', 'European Union', 'International')
+Group by location
+order by TotalDeathCount desc;
+
+
+-- Countries with infection rate
+Select 
+	Location,
+	Population, 
+	MAX(total_cases) as HighestInfectionCount,  
+	Max((total_cases/population))*100 as PercentPopulationInfected
+From CovidDeaths
+Group by Location, Population
+order by PercentPopulationInfected desc;
+
+-- countries with infection over period
+Select 
+	Location, 
+	Population,
+	date, 
+	MAX(total_cases) as HighestInfectionCount,  
+	Max((total_cases/population))*100 as PercentPopulationInfected
+From CovidDeaths
+Group by Location, Population, date
+order by PercentPopulationInfected desc;
+
 
 
